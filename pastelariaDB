@@ -1,0 +1,36 @@
+CREATE DATABASE pastelaria;
+USE pastelaria;
+
+CREATE TABLE Clientes (
+    ClienteID INT PRIMARY KEY AUTO_INCREMENT,
+    NomeCompleto VARCHAR(100),
+    NomePreferido VARCHAR(50),
+    CPF CHAR(11) UNIQUE,
+    DataNascimento DATE,
+    Telefone VARCHAR(15),
+    Email VARCHAR(100),
+    Bairro VARCHAR(100),
+    Cidade VARCHAR(100),
+    Estado CHAR(2)
+);
+
+CREATE TABLE Pasteis (
+    PastelID INT PRIMARY KEY AUTO_INCREMENT,
+    Nome VARCHAR(100),
+    Preco DECIMAL(10, 2),
+    Tamanho VARCHAR(50),
+    Categoria VARCHAR(50)
+);
+
+CREATE TABLE Recheios (
+    RecheioID INT PRIMARY KEY AUTO_INCREMENT,
+    Nome VARCHAR(100)
+);
+
+CREATE TABLE Recheios_Pasteis (
+    PastelID INT,
+    RecheioID INT,
+    FOREIGN KEY (PastelID) REFERENCES Pasteis(PastelID),
+    FOREIGN KEY (RecheioID) REFERENCES Recheios(RecheioID),
+    PRIMARY KEY (PastelID, RecheioID)
+);
