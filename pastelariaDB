@@ -34,3 +34,48 @@ CREATE TABLE Recheios_Pasteis (
     FOREIGN KEY (RecheioID) REFERENCES Recheios(RecheioID),
     PRIMARY KEY (PastelID, RecheioID)
 );
+
+
+CREATE TABLE Produtos (
+    ProdutoID INT PRIMARY KEY AUTO_INCREMENT,
+    Nome VARCHAR(100),
+    Tipo VARCHAR(50),  -- Ex: Pastel, Suco, Refrigerante
+    Preco DECIMAL(10, 2)
+);
+
+
+CREATE TABLE Pedidos (
+    PedidoID INT PRIMARY KEY AUTO_INCREMENT,
+    ClienteID INT,
+    DataPedido DATE,
+    FormaPagamento VARCHAR(50),
+    FOREIGN KEY (ClienteID) REFERENCES Clientes(ClienteID)
+);
+
+
+CREATE TABLE Produtos_Pedidos (
+    PedidoID INT,
+    ProdutoID INT,
+    Quantidade INT,
+    FOREIGN KEY (PedidoID) REFERENCES Pedidos(PedidoID),
+    FOREIGN KEY (ProdutoID) REFERENCES Produtos(ProdutoID),
+    PRIMARY KEY (PedidoID, ProdutoID)
+);
+
+
+INSERT INTO Clientes (NomeCompleto, NomePreferido, CPF, DataNascimento, Telefone, Email, Bairro, Cidade, Estado)
+VALUES
+('João Silva', 'João', '12345678901', '1990-05-15', '111111111', 'joao.silva@example.com', 'Centro', 'São Paulo', 'SP');
+
+INSERT INTO Pasteis (Nome, Preco, Tamanho, Categoria)
+VALUES
+('Pastel de Queijo', 5.00, 'Médio', 'Vegetariano'),
+('Pastel de Carne', 6.00, 'Grande', 'Tradicional');
+
+INSERT INTO Recheios (Nome)
+VALUES
+('Queijo'), ('Carne'), ('Bacon');
+
+INSERT INTO Recheios_Pasteis (PastelID, RecheioID)
+VALUES
+(1, 1), (2, 2), (2, 3);
