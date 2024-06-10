@@ -39,7 +39,7 @@ CREATE TABLE Recheios_Pasteis (
 CREATE TABLE Produtos (
     ProdutoID INT PRIMARY KEY AUTO_INCREMENT,
     Nome VARCHAR(100),
-    Tipo VARCHAR(50),  -- Ex: Pastel, Suco, Refrigerante
+    Tipo VARCHAR(50),  
     Preco DECIMAL(10, 2)
 );
 
@@ -65,20 +65,28 @@ CREATE TABLE Produtos_Pedidos (
 
 INSERT INTO Clientes (NomeCompleto, NomePreferido, CPF, DataNascimento, Telefone, Email, Bairro, Cidade, Estado)
 VALUES
-('João Silva', 'João', '12345678901', '1990-05-15', '111111111', 'joao.silva@example.com', 'Centro', 'São Paulo', 'SP');
+('João Silva', 'João', '12345678901', '1990-05-15', '111111111', 'joao.silva@example.com', 'Centro', 'São Paulo', 'SP'),
+('Ana Pereira', 'Ana', '123.123.123-12', '1978-11-15', '(31) 93456-7890', 'ana.pereira@example.com', 'Savassi', 'Belo Horizonte', 'MG'),
+('Carlos Oliveira', 'Carlos', '321.321.321-21', '1982-02-28', '(41) 97654-3210', 'carlos.oliveira@example.com', 'Batel', 'Curitiba', 'PR'),
+('Lucia Santos', 'Lucia', '456.456.456-45', '1995-06-10', '(71) 91234-5678', 'lucia.santos@example.com', 'Barra', 'Salvador', 'BA'),
+('Maria Silva', 'Maria', '123.456.789-00', '1985-03-12', '(11) 91234-5678', 'maria.silva@example.com', 'Centro', 'São Paulo', 'SP');
 
 INSERT INTO Pasteis (Nome, Preco, Tamanho, Categoria)
 VALUES
 ('Pastel de Queijo', 5.00, 'Médio', 'Vegetariano'),
+('Pastel de Carne', 6.00, 'Grande', 'Tradicional'),
+('Pastel de Carne', 5.50, 'Médio', 'Salgado'),
+('Pastel de Queijo', 4.75, 'Pequeno', 'Salgado'),
+('Pastel de Chocolate', 5.00, 'Médio', 'Doce'),
 ('Pastel de Carne', 6.00, 'Grande', 'Tradicional');
 
 INSERT INTO Recheios (Nome)
 VALUES
-('Queijo'), ('Carne'), ('Bacon');
+('Queijo'), ('Carne'), ('Bacon'),('Doce de Leite'),('Palmito'),('Frango com Catupiry'),('Romeu e Julieta'),('Calabresa');
 
 INSERT INTO Recheios_Pasteis (PastelID, RecheioID)
 VALUES
-(1, 1), (2, 2), (2, 3);
+(1, 1), (2, 2), (2, 3),(1, 2),(3, 4),(4, 5);
 
 DELIMITER //
 CREATE PROCEDURE ListarPasteisVeganosParaAdultos()
