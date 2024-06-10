@@ -1,0 +1,111 @@
+JEFFERSON:
+-- Procedures
+DELIMITER //
+CREATE PROCEDURE ListarPasteisVeganosParaAdultos()
+BEGIN
+    SELECT p.Nome
+    FROM Pasteis p
+    JOIN Produtos_Pedidos pp ON p.PastelID = pp.ProdutoID
+    JOIN Pedidos ped ON pp.PedidoID = ped.PedidoID
+    JOIN Clientes c ON ped.ClienteID = c.ClienteID
+    WHERE p.Categoria = 'Vegano' AND TIMESTAMPDIFF(YEAR, c.DataNascimento, CURDATE()) > 18;
+END //
+
+CREATE PROCEDURE ClientesComMaiorNumeroDePedidos()
+BEGIN
+    SELECT c.NomeCompleto, COUNT(p.PedidoID) AS NumPedidos, YEAR(p.DataPedido) AS Ano, MONTH(p.DataPedido) AS Mes
+    FROM Clientes c
+    JOIN Pedidos p ON c.ClienteID = p.ClienteID
+    GROUP BY c.ClienteID, Ano, Mes
+    ORDER BY NumPedidos DESC;
+END //
+
+CREATE PROCEDURE PasteisComBaconOuQueijo()
+BEGIN
+    SELECT p.Nome
+    FROM Pasteis p
+    JOIN Recheios_Pasteis rp ON p.PastelID = rp.PastelID
+    JOIN Recheios r ON rp.RecheioID = r.RecheioID
+    WHERE r.Nome IN ('Bacon', 'Queijo');
+END //
+DELIMITER ;
+
+-- Funções
+DELIMITER //
+CREATE FUNCTION ValorTotalVendas()
+RETURNS DECIMAL(10, 2)
+BEGIN
+    DECLARE total DECIMAL(10, 2);
+    SELECT SUM(p.Preco * pp.Quantidade) INTO total
+    FROM Produtos p
+    JOIN Produtos_Pedidos pp ON p.ProdutoID = pp.ProdutoID;
+    RETURN total;
+END //
+
+CREATE FUNCTION PedidosComPastelEBebida()
+RETURNS INT
+BEGIN
+    DECLARE count INT;
+    SELECT COUNT(DISTINCT pp1.PedidoID) INTO count
+    FROM Produtos_Pedidos pp1
+    JOIN Produtos_Pedidos pp2 ON pp1.PedidoID = pp2.PedidoID
+    JOIN Produtos p1 ON pp1.ProdutoID = p1.ProdutoID
+    JOIN Produtos p2 ON pp2.ProdutoID = p2.ProdutoID
+    WHERE p1.Tipo = 'Pastel' AND p2.Tipo IN ('Suco', 'Refrigerante');
+    RETURN count;
+END //
+
+CREATE FUNCTION PasteisMaisVendidos()
+RETURNS TABLE (Nome VARCHAR(100), Quantidade INT)
+BEGIN
+    RETURN
+    SELECT p.Nome, SUM(pp.Quantidade) AS Quantidade
+    FROM Pasteis p
+    JOIN Produtos_Pedidos pp ON p.PastelID = pp.ProdutoID
+    GROUP BY p.PastelID
+    ORDER BY Quantidade DESC;
+END //
+DELIMITER ;
+
+-- Gatilhos
+DELIMITER //
+CREATE TRIGGER AtualizaEstoqueProduto AFTER INSERT ON Produtos_Pedidos
+FOR EACH ROW
+BEGIN
+    UPDATE Produtos
+    SET Estoque = Estoque - NEW.Quantidade
+    WHERE ProdutoID = NEW.ProdutoID;
+END //
+
+CREATE TRIGGER AtualizaEstoqueProdutoDelete AFTER DELETE ON Produtos_Pedidos
+FOR EACH ROW
+BEGIN
+    UPDATE Produtos
+    SET Estoque = Estoque + OLD.Quantidade
+    WHERE ProdutoID = OLD.ProdutoID;
+END //
+
+CREATE TRIGGER VerificaEstoqueProduto BEFORE INSERT ON Produtos_Pedidos
+FOR EACH ROW
+BEGIN
+    DECLARE estoqueAtual INT;
+    SELECT Estoque INTO estoqueAtual FROM Produtos WHERE ProdutoID = NEW.ProdutoID;
+    IF estoqueAtual < NEW.Quantidade THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Estoque insuficiente para o produto.';
+    END IF;
+END //
+
+CREATE TRIGGER LogInserePedido AFTER INSERT ON Pedidos
+FOR EACH ROW
+BEGIN
+    INSERT INTO LogPedidos (PedidoID, ClienteID, DataPedido)
+    VALUES (NEW.PedidoID, NEW.ClienteID, NEW.DataPedido);
+END //
+
+CREATE TRIGGER LogDeletePedido AFTER DELETE ON Pedidos
+FOR EACH ROW
+BEGIN
+    INSERT INTO LogPedidos (PedidoID, ClienteID, DataPedido)
+    VALUES (OLD.PedidoID, OLD.ClienteID, OLD.DataPedido);
+END //
+DELIMITER ;
