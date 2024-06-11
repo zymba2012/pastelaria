@@ -198,3 +198,67 @@ BEGIN
 END //
 DELIMITER ;
 
+CREATE VIEW ViewClientesAdultos AS
+SELECT NomeCompleto, NomePreferido, CPF, Telefone, Email
+FROM Clientes
+WHERE TIMESTAMPDIFF(YEAR, DataNascimento, CURDATE()) > 18;
+
+CREATE VIEW ViewPastelComBaconOuQueijo AS
+SELECT p.Nome
+FROM Pasteis p
+JOIN Recheios_Pasteis rp ON p.PastelID = rp.PastelID
+JOIN Recheios r ON rp.RecheioID = r.RecheioID
+WHERE r.Nome IN ('Bacon', 'Queijo');
+
+CREATE VIEW ViewValorTotalVendas AS
+SELECT SUM(p.Preco * pp.Quantidade) AS ValorTotal
+FROM Produtos p
+JOIN Produtos_Pedidos pp ON p.ProdutoID = pp.ProdutoID;
+
+CREATE VIEW ViewPedidosPastelEBebida AS
+SELECT DISTINCT pp1.PedidoID
+FROM Produtos_Pedidos pp1
+JOIN Produtos_Pedidos pp2 ON pp1.PedidoID = pp2.PedidoID
+JOIN Produtos p1 ON pp1.ProdutoID = p1.ProdutoID
+JOIN Produtos p2 ON pp2.ProdutoID = p2.ProdutoID
+WHERE p1.Tipo = 'Pastel' AND p2.Tipo IN ('Suco', 'Refrigerante');
+
+CREATE VIEW ViewPasteisMaisVendidos AS
+SELECT p.Nome, SUM(pp.Quantidade) AS Quantidade
+FROM Pasteis p
+JOIN Produtos_Pedidos pp ON p.PastelID = pp.ProdutoID
+GROUP BY p.PastelID
+ORDER BY Quantidade DESC;
+
+CREATE VIEW ViewClientesMaisPedidos AS
+SELECT c.NomeCompleto, COUNT(p.PedidoID) AS NumPedidos, YEAR(p.DataPedido) AS Ano, MONTH(p.DataPedido) AS Mes
+FROM Clientes c
+JOIN Pedidos p ON c.ClienteID = p.ClienteID
+GROUP BY c.ClienteID, Ano, Mes
+ORDER BY NumPedidos DESC;
+
+CREATE VIEW ViewPedidosComDetalhes AS
+SELECT p.PedidoID, p.DataPedido, c.NomeCompleto, pp.ProdutoID, pr.Nome AS NomeProduto, pp.Quantidade
+FROM Pedidos p
+JOIN Clientes c ON p.ClienteID = c.ClienteID
+JOIN Produtos_Pedidos pp ON p.PedidoID = pp.PedidoID
+JOIN Produtos pr ON pp.ProdutoID = pr.ProdutoID;
+
+CREATE VIEW ViewClientesComMaiorNumeroPedidos AS
+SELECT c.NomeCompleto, COUNT(p.PedidoID) AS NumPedidos
+FROM Clientes c
+JOIN Pedidos p ON c.ClienteID = p.ClienteID
+GROUP BY c.ClienteID
+ORDER BY NumPedidos DESC;
+
+CREATE VIEW ViewPedidosPorMes AS
+SELECT YEAR(DataPedido) AS Ano, MONTH(DataPedido) AS Mes, COUNT(PedidoID) AS TotalPedidos
+FROM Pedidos
+GROUP BY Ano, Mes;
+
+CREATE VIEW ViewProdutosVendidos AS
+SELECT p.Nome, SUM(pp.Quantidade) AS QuantidadeVendida
+FROM Produtos p
+JOIN Produtos_Pedidos pp ON p.ProdutoID = pp.ProdutoID
+GROUP BY p.ProdutoID
+ORDER BY QuantidadeVendida DESC;
